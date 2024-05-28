@@ -190,4 +190,91 @@ def two_sep_minrank(g):
     return mr;
 
 #Lifting matrices with matroids
+#requires sage matroid package, sage.matroids.advanced import *
+#Input: a symmetric matrix A ( could also do combinatorially symmetric by slight alteration )
+#Output: Graphs G' where A in S(G) can be lifted to by adding a vertex and where there exists a matrix in S(G') with the same rank 
+
+def Col_Supp_Lifts(A):
+    
+    print 'rank = ', A.rank(), '\n'
+    #print A, '\n'
+    #n number of rows/columns in A
+    n=len(list(A))
+    
+    #constructing the graph for A
+    print 'G(A) = '
+    G=Graph([])
+    G.add_vertices(range(n))
+    for i in range(0,n):
+        for j in range(i+1,n):
+            if A[i][j] != 0:
+                G.add_edge((i,j))
+    G.show()
+    
+    #print '===========================================================', '\n', 'Minimal support lifts for A ', '\n'
+
+    #requires sage matroid package, sage.matroids.advanced import *
+    kerA=Matrix(A.kernel().basis())
+
+    #Computing matroid data for the null space of the null space
+
+    M=Matroid(kerA)
+    # The list of circuits for ker(A).  This should be the minimal supports of the column space.
+    CM=sorted([sorted(C) for C in M.circuits()])
+    #print CM
+
+#     for i in range(len(CM)):
+#         H=deepcopy(G)
+#         H.add_vertex(7)
+#         for j in range(len(CM[i])):
+#             H.add_edges([(7,CM[i][j])])
+        #H.show()
+        #print H.graph6_string(), ' with neighbors of 7 ', CM[i]
+        
+    #Construct all unions of supports in CM
+    N=[i for i in range(len(CM))]
+    S=[list(s) for s in subsets(N)]
+    print 'number of unions of column supports = ', len(S)
+
+    # m=3500
+    # print S[m], '\n'
+    # U=[CM[k] for k in S[m]]
+    # print list(set(flatten(U)))
+
+    L=[]
+
+
+    for j in range(len(S)):
+         for k in range(len(S[j])):
+            U=[CM[k] for k in S[j]]
+            fU=list( set( flatten(U)))
+            H=deepcopy(G)
+            H.add_vertex(7)
+            for i in range(len(fU)):
+                H.add_edges([(7,fU[i])])
+            #H.show()
+            #print H.graph6_string()
+            L.append(H.graph6_string())
+    #Gets rid of duplicates in L
+    L_new = list(set(L))
+
+    m=len(L_new)
+    L_new_remove=[]
+    for i in range(m):
+        for j in range(i+1,m):
+            if Graph(L_new[i]).is_isomorphic(Graph(L_new[j])):
+                L_new_remove.append(L_new[j])
+    print 'number of unique unions = ', len(L_new)
+    L_new_new = list( set(L_new).difference( set(L_new_remove)) )
+    print 'number of non-isomorphic lifting graphs = ', len( L_new_new )
+    #print list( L_new_new )
+    
+    return L_new_new;
+
+
+
+
+
+
+
 
