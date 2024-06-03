@@ -1,3 +1,13 @@
+def flatten(l):
+  out = []
+  for item in l:
+    if isinstance(item, (list, tuple)):
+      out.extend(flatten(item))
+    else:
+      out.append(item)
+  return out
+
+
 def two_sep_minrank(g):
     if g.vertex_connectivity() == 2:
         #print 'G:'
