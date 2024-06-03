@@ -237,11 +237,11 @@ def Col_Supp_Lifts(A):
 
 #     for i in range(len(CM)):
 #         H=deepcopy(G)
-#         H.add_vertex(7)
+#         H.add_vertex(n)
 #         for j in range(len(CM[i])):
-#             H.add_edges([(7,CM[i][j])])
+#             H.add_edges([(n,CM[i][j])])
         #H.show()
-        #print H.graph6_string(), ' with neighbors of 7 ', CM[i]
+        #print H.graph6_string(), ' with neighbors of  ', n, CM[i]
         
     #Construct all unions of supports in CM
     N=[i for i in range(len(CM))]
