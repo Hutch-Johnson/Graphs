@@ -8,7 +8,8 @@ def flatten(l):
       out.append(item)
   return out
 
-#########################################
+#################################################################################
+
 
 def two_sep_minrank(g):
     if g.vertex_connectivity() == 2:
@@ -201,6 +202,9 @@ def two_sep_minrank(g):
         print 'not 2-separable'
     return mr;
 
+#################################################################################
+
+
 #Lifting matrices with matroids
 #requires sage matroid package, sage.matroids.advanced import *
 #Input: a symmetric matrix A ( could also do combinatorially symmetric by slight alteration )
@@ -284,7 +288,88 @@ def Col_Supp_Lifts(A):
     return L_new_new;
 
 
+#################################################################################
 
+def kForts(G,k):
+# input the connected graph G
+# ouput the set of forts of size k
+    V = G.vertices()
+    S = Subsets(V,k)
+    Forts = set(S)
+    for s in S:
+        for x in set(V) - set(s):
+            if len(list((set(G.neighbors(x)) & set(s))))==1:
+                Forts.remove(s)
+                break
+    print k,'   ',len(Forts)          
+        
+    return list(Forts);
+
+#################################################################################
+
+
+def kFortsGraphs(G,k):
+# input the connected graph G
+# ouput the set of forts of size k
+    V = G.vertices()
+    S = Subsets(V,k)
+    Forts = set(S)
+    for s in S:
+        for x in set(V) - set(s):
+            if len(list((set(G.neighbors(x)) & set(s))))==1:
+                Forts.remove(s)
+                break
+    for f in Forts:
+        G.graphplot(vertex_colors={'#FFD966': f, '#A3BCD2': list(set(G.vertices()).difference(set(f)))}).show()         
+        
+    return list(Forts);
+
+#################################################################################
+
+def All_Forts(G):
+# input the connected graph G
+# ouput the set of forts of g
+    V = G.vertices()
+    S = Subsets(V)
+    Forts = set(S)
+    for s in S:
+        for x in set(V) - set(s):
+            if len(list((set(G.neighbors(x)) & set(s))))==1:
+                Forts.remove(s)
+                break
+        if len(list(s))==0:
+            Forts.remove(s)
+    return list(Forts);   
+
+
+#################################################################################
+
+def Minimal_Forts(G):
+# input the connected graph G
+# ouput the set of minimal forts of g
+    V = G.vertices()
+    S = Subsets(V)
+    Forts = set(S)
+    for s in S:
+        for x in set(V) - set(s):
+            if len(list((set(G.neighbors(x)) & set(s))))==1:
+                Forts.remove(s)
+                break
+        if len(list(s))==0:
+            Forts.remove(s)
+    #print 'Forts', Forts         
+
+    NotMinimal=[]
+    for t in Forts:
+        for s in Forts:
+            if len(list(t))>len(list(s)):
+                if s.issubset(t)==True:
+                    NotMinimal.append(t)
+                    break
+    #print 'Non-minimal forts', NotMinimal
+    Minimal = Forts.difference(set(NotMinimal))
+    return list(Minimal);
+                    
 
 
 
