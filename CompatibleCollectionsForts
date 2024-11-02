@@ -1,0 +1,116 @@
+from sage.graphs.connectivity import *
+from sage.graphs.graph_input import from_graph6
+from sage.matroids.advanced import *
+from sage.matroids.advanced import setprint
+
+#input: graph
+#output: graph of forts with edges for completable pairs, edges labeled with forts that complete them
+
+def Fort_RGraph(G):
+    
+    #construct edges of Fort Graph
+    F=[Set(f) for f in All_Forts(G)]
+    BP=BadPairs(F)
+    BP=list(Set(BP))
+    l=len(F)
+    E=Subsets(range(l),2)
+    GP=list(set(E) - set(BP))
+    GPlist=[sorted(x) for x in GP]
+    
+    #turn edges into tuples and define Fort Graph
+    GPtuple=[tuple(a) for a in GPlist]
+    FortGP=Graph(GPtuple)
+    
+    #remove edges between a subset and a set containing it
+    GPlist_min=copy(GPlist)
+    lenGP=len(GP)
+    for i in range(lenGP):
+        index0=GPlist[i][0]
+        index1=GPlist[i][1]
+        if (F[index0].issubset(F[index1]) or F[index1].issubset(F[index0])):
+            #print index0,A1[index0],index1,A1[index1]
+            GPlist_min.remove(GPlist[i])
+    
+    #refined edge set
+    GPmin_edges=[tuple(a) for a in GPlist_min]
+    FortGPmin=Graph(GPmin_edges)
+    
+    #labels edeges with forts that complete the pair
+    for x in FortGPmin.edges():
+        list_x=list(x)
+        FortGPmin.set_edge_label(list_x[0],list_x[1],ExchangeUnionsIndices([F[list_x[0]],F[list_x[1]]],F))
+        
+    #plot Fort Graph with labeled edges
+    #FortGPmin.plot(vertex_color='white',vertex_size=500,edge_labels=True).show(figsize=(10,10))
+    print 'clique number = ', FortGPmin.clique_number()
+    
+    return FortGPmin
+
+
+#input: graph G size of clique
+#output: list of list of vertices making up cliques of size k in the Forts Graph, the vertices are potential compatible collections
+
+def kCliquesFortGraph(G,k):
+    
+    FortG=Fort_RGraph(G)
+    m=len(FortG.vertices())
+    t=m-k
+    S=Subsets(range(m),t)
+
+    FortG_clique=[]
+
+    for s in S:
+        s=list(s)
+        h=copy(FortG)
+        h.delete_vertices(s)
+        g=graphs.CompleteGraph(k)
+        if h.is_isomorphic(g):
+            FortG_clique.append(h.edges())
+            #print h.vertices()
+            #h.plot(vertex_color='white',edge_labels='True',layout='circular').show(figsize=(6,6))
+            
+    return FortG_clique
+
+#input: graph G and integer k
+#output: the set of compatible collections of forts of size k
+
+def CompCollForts(G,k):
+    
+    FortG=Fort_RGraph(G)
+    CN=FortG.clique_number()
+    CCF=[]
+    
+    if k>CN:
+        print 'no compatible collections larger than ', CN
+        
+    else:
+        FortG_clique=kCliquesFortGraph(G,k)
+        for C in FortG_clique:
+            g=Graph(C)
+            edges=g.edges()
+            good_labels=[]
+            for x in edges:
+                edge_list=list(x)
+                x0=edge_list[0]
+                x1=edge_list[1]
+                label=g.edge_label(x0,x1)
+                #print 'label', label
+                if len(label)==0:
+                    good_labels.append(label)
+                good_label=[]
+                for l in label:
+                    if len(l)>0:
+                        if ( any( (x in g.vertices()) for x in l) ):
+                            good_label.append(l)
+                            #print good_label
+                        if len(good_label)==len(label):
+                            good_labels.append(label)
+
+            if len(good_labels)==k*(k-1)/2:
+                Graph(C).plot(vertex_color='white',vertex_size=500,edge_labels=True,layout='circular').show(figsize=(10,10))
+                v=Graph(C).vertices()
+                CCF.append(v)
+
+
+    return CCF
+
